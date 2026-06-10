@@ -18,16 +18,13 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: root
-          password: ${{ secrets.SERVER_PASSWORD }}
-          port: 22
-          script_stop: true
-          script: |
+      - name: Deploy via Script
+        run: |
+          sudo apt-get install -y sshpass
+          # -vvv покажет нам ВООБЩЕ ВСЁ, что происходит во время этих 2 минут
+          sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -vvv -o StrictHostKeyChecking=no root@${{ secrets.SERVER_IP }} << 'EOF'
             cd /root
             docker-compose pull
             docker-compose down
             docker-compose up -d
+          EOF
