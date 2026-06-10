@@ -18,18 +18,19 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Server via SSH
+      - name: Deploy to Server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
           username: root
           password: ${{ secrets.SERVER_PASSWORD }}
           port: 22
-          # Эти настройки лечат зависания на новых Ubuntu
-          command_timeout: 10m
+          # Эти три строки — наше секретное оружие против зависаний
+          sync: true
+          command_timeout: 5m
+          connect_timeout: 30s
           script: |
             cd /root
-            # В новой Ubuntu команда часто пишется БЕЗ дефиса
-            docker compose pull || docker-compose pull
-            docker compose down || docker-compose down
-            docker compose up -d || docker-compose up -d
+            docker compose pull
+            docker compose down
+            docker compose up -d
